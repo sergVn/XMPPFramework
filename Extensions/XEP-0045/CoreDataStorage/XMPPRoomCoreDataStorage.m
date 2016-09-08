@@ -901,7 +901,7 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 {
 	XMPPLogTrace();
 	
-	
+    NSLog(@"asdasdasdasd asd asd ");
 	XMPPJID *presenceJID = [presence from];
 	XMPPStream *xmppStream = room.xmppStream;
 	

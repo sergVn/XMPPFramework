@@ -183,6 +183,7 @@
 
 - (BOOL)shouldArchiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing xmppStream:(XMPPStream *)xmppStream
 {
+    //NSLog(@"message = \(%@)",message);
 	// XEP-0136 Section 2.9: Preferences precedence rules:
 	// 
 	// When determining archiving preferences for a given message, the following rules shall apply:
@@ -410,12 +411,16 @@
 
 - (void)xmppStream:(XMPPStream *)sender didSendMessage:(XMPPMessage *)message
 {
-	XMPPLogTrace();
-	
-	if ([self shouldArchiveMessage:message outgoing:YES xmppStream:sender])
-	{
-		[xmppMessageArchivingStorage archiveMessage:message outgoing:YES xmppStream:sender];
-	}
+    XMPPLogTrace();
+    if ([message.type isEqualToString:@"groupchat"]){
+        return ;
+    } else {
+        
+        if ([self shouldArchiveMessage:message outgoing:YES xmppStream:sender])
+        {
+            [xmppMessageArchivingStorage archiveMessage:message outgoing:YES xmppStream:sender];
+        }
+    }
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message

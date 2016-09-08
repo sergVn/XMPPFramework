@@ -192,7 +192,7 @@ NSString *const XMPPMUCErrorDomain = @"XMPPMUCErrorDomain";
     [xmppStream sendElement:iq];
     hasRequestedRooms = YES;
   }};
-	
+
   if (dispatch_get_specific(moduleQueueTag))
     block();
   else
@@ -391,10 +391,12 @@ failedToDiscoverRoomsForServiceNamed:serviceName
 {
   NSString *type = [iq type];
 
+     NSLog(@"didReceiveIQ = %@",iq);
+    
   if ([type isEqualToString:@"result"] || [type isEqualToString:@"error"]) {
     return [xmppIDTracker invokeForElement:iq withObject:iq];
   }
-
+    
   return NO;
 }
 

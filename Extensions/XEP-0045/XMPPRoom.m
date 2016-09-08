@@ -1059,8 +1059,11 @@ enum XMPPRoomState
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
+    //NSLog(@"XMPPRoom didReceiveMessage = %@",message);
 	// This method is invoked on the moduleQueue.
 	
+    //return;
+    
 	XMPPJID *from = [message from];
 	
 	if (![roomJID isEqualToJID:from options:XMPPJIDCompareBare])
@@ -1084,7 +1087,7 @@ enum XMPPRoomState
 	
 	if (isChatMessage)
 	{
-		[xmppRoomStorage handleIncomingMessage:message room:self];
+		//[xmppRoomStorage handleIncomingMessage:message room:self];
 		[multicastDelegate xmppRoom:self didReceiveMessage:message fromOccupant:from];
 	}
     else if ([message isGroupChatMessageWithSubject])
