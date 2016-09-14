@@ -122,4 +122,9 @@
                                                    stream:(XMPPStream *)xmppStream
                                                 inContext:(NSManagedObjectContext *)moc;
 
+- (NSArray*)allOccupantsFromRoom:(XMPPJID *)roomJID;
+- (NSArray *)occupantsForJID:(XMPPJID *)jid
+                      stream:(XMPPStream *)xmppStream
+                   inContext:(NSManagedObjectContext *)moc;
+
 @end

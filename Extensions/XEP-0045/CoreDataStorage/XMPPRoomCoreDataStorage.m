@@ -893,6 +893,69 @@ static XMPPRoomCoreDataStorage *sharedInstance;
 	return (XMPPRoomOccupantCoreDataStorageObject *)[results lastObject];
 }
 
+- (NSArray *)occupantsForJID:(XMPPJID *)jid
+                      stream:(XMPPStream *)xmppStream
+                   inContext:(NSManagedObjectContext *)moc
+{
+    if (jid == nil) return nil;
+    if (moc == nil) return nil;
+    
+    NSEntityDescription *entity = [self occupantEntity:moc];
+    
+    NSPredicate *predicate;
+    if (xmppStream)
+    {
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        NSString *predicateFormat = @"jidStr == %@";
+        predicate = [NSPredicate predicateWithFormat:predicateFormat, jid, streamBareJidStr];
+    }
+    else
+    {
+        predicate = [NSPredicate predicateWithFormat:@"jidStr == %@", jid];
+    }
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    
+    NSError *error = nil;
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:&error];
+    
+    if (error)
+    {
+        XMPPLogWarn(@"%@: %@ - fetch error: %@", THIS_FILE, THIS_METHOD, error);
+    }
+    
+    return results;
+}
+
+- (NSArray*)allOccupantsFromRoom:(XMPPJID *)roomJID {
+    XMPPLogTrace();
+    //AssertPrivateQueue();
+    
+    NSManagedObjectContext *moc = [self mainThreadManagedObjectContext];
+    NSEntityDescription *entity = [self occupantEntity:moc];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setFetchBatchSize:saveThreshold];
+    
+    if (roomJID)
+    {
+        //NSPredicate *predicate;
+        //predicate = [NSPredicate predicateWithFormat:@"roomJIDStr == %@", [roomJID bare]];
+        
+        //[fetchRequest setPredicate:predicate];
+    }
+    
+    NSArray *allOccupants = [moc executeFetchRequest:fetchRequest error:nil];
+    //NSLog(@"allOccupants = %@",allOccupants);
+    //return allOccupants;
+    
+    return allOccupants;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPRoomStorage Protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
