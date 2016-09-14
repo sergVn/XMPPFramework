@@ -443,6 +443,7 @@ static XMPPRosterCoreDataStorage *sharedInstance;
 
 - (void)clearAllUsersAndResourcesForXMPPStream:(XMPPStream *)stream
 {
+    return;
 	XMPPLogTrace();
 	
 	[self scheduleBlock:^{

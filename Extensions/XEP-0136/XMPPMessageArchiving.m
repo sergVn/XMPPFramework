@@ -422,11 +422,60 @@
         }
     }
 }
+/*
+- (BOOL)isMessageExist:(XMPPMessage*)messaage {
+    
+    NSManagedObjectContext *moc = [self managedObjectContext];
+    NSEntityDescription *messageEntity = [self messageEntity:moc];
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    
+    NSString *jid = messaage.from.bare;
+    NSString *messageId = messaage.elementID;
+    
+    NSString *predicateUserIdFormat = @"bareJidStr like %@";
+    NSString *predicateMessageIdFormat = @"messageStr contains[cd] %@";
+    
+    NSPredicate *predicateUserId = [NSPredicate predicateWithFormat:predicateUserIdFormat,jid];
+    NSPredicate *predicateMessageId = [NSPredicate predicateWithFormat:predicateMessageIdFormat,messageId];
+    NSLog(@"predicateUserId = %@",predicateUserId);
+    NSLog(@"predicateMessageId = %@",predicateMessageId);
+    
+    NSPredicate *predicate = [NSCompoundPredicate andPredicateWithSubpredicates:@[predicateUserId,predicateMessageId]];
+    NSLog(@"predicate = %@",predicate);
+    
+    
+    fetchRequest.entity = messageEntity;
+    fetchRequest.predicate = predicate;
+    fetchRequest.fetchLimit = 1;
+    
+    NSError *error = nil;
+    NSArray *result = [moc executeFetchRequest:fetchRequest error:&error];
+    
+    if (!result) {
+        NSLog(@"Error fetching Employee objects: %@\n%@", [error localizedDescription], [error userInfo]);
+        abort();
+    }
+    
+    if (result.count > 0) {
+        XMPPMessageArchiving_Message_CoreDataObject *msg = result.firstObject;
+        NSLog(@"msg %@",msg.messageStr);
+        
+        return YES;
+    }
+
+    return NO;
+}
+*/
+
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
 {
 	XMPPLogTrace();
-	
+	/*
+    if ([xmppMessageArchivingStorage isMessageExist:message] == YES) {
+        return ;
+    }
+    */
 	if ([self shouldArchiveMessage:message outgoing:NO xmppStream:sender])
 	{
 		[xmppMessageArchivingStorage archiveMessage:message outgoing:NO xmppStream:sender];

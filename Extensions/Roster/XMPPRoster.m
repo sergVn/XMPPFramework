@@ -867,7 +867,7 @@ enum XMPPRosterFlags
 		
 		return;
 	}
-	
+
 	if ([[presence type] isEqualToString:@"subscribe"])
 	{
 		XMPPJID *userJID = [[presence from] bareJID];
@@ -876,6 +876,7 @@ enum XMPPRosterFlags
 		
 		if (knownUser && [self autoAcceptKnownPresenceSubscriptionRequests])
 		{
+            NSLog(@"Auto subscribe†");
 			// Presence subscription request from someone who's already in our roster.
 			// Automatically approve.
 			// 

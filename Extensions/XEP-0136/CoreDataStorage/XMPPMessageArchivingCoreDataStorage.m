@@ -331,6 +331,83 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	return [super configureWithParent:aParent queue:queue];
 }
 
+- (BOOL)isMessageExist:(XMPPMessage*)messaage {
+    
+    NSManagedObjectContext *moc = [self managedObjectContext];
+    NSEntityDescription *messageEntity = [self messageEntity:moc];
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    
+    NSLog(@"messaage => %@",messaage);
+    
+    NSString *jid = messaage.from.bare;
+    NSString *messageId = messaage.elementID;
+    
+    NSString *predicateUserIdFormat = @"bareJidStr like %@";
+    NSString *predicateMessageIdFormat = @"messageStr contains[cd] %@";
+    
+    NSPredicate *predicateUserId = [NSPredicate predicateWithFormat:predicateUserIdFormat,jid];
+    NSPredicate *predicateMessageId = [NSPredicate predicateWithFormat:predicateMessageIdFormat,messageId];
+    NSLog(@"predicateUserId = %@",predicateUserId);
+    NSLog(@"predicateMessageId = %@",predicateMessageId);
+    
+    NSPredicate *predicate;
+    
+    if (jid && messageId) {
+         predicate = [NSCompoundPredicate andPredicateWithSubpredicates:@[predicateUserId,predicateMessageId]];
+    } else if (jid == nil) {
+        predicate = [NSCompoundPredicate andPredicateWithSubpredicates:@[predicateMessageId]];
+    } else {
+        return NO;
+    }
+
+    NSLog(@"predicate = %@",predicate);
+    
+    fetchRequest.entity = messageEntity;
+    fetchRequest.predicate = predicate;
+    fetchRequest.fetchLimit = 1;
+    
+    NSError *error = nil;
+    NSArray *result = [moc executeFetchRequest:fetchRequest error:&error];
+    
+    if (!result) {
+        NSLog(@"Error fetching Employee objects: %@\n%@", [error localizedDescription], [error userInfo]);
+        abort();
+    }
+    
+    if (result.count > 0) {
+        XMPPMessageArchiving_Message_CoreDataObject *msg = result.firstObject;
+        NSLog(@"msg %@",msg.messageStr);
+        
+        return YES;
+    }
+    
+    /*
+     NSEntityDescription *messageEntity = [self messageEntity:moc];
+     
+     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"composing == YES"];
+     
+     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+     fetchRequest.entity = messageEntity;
+     fetchRequest.predicate = predicate;
+     fetchRequest.fetchBatchSize = saveThreshold;
+     */
+    
+    
+    /*
+     let moc = xmppMessageStorage?.mainThreadManagedObjectContext
+     let entityDescription = NSEntityDescription.entityForName("XMPPMessageArchiving_Message_CoreDataObject", inManagedObjectContext: moc!)
+     let request = NSFetchRequest()
+     
+     let predicateFormat = "bareJidStr like %@ "
+     let predicate = NSPredicate(format: predicateFormat, jid)
+     
+     let predicateFormatCurentUser = "streamBareJidStr = %@ "
+     let predicateCurentUser = NSPredicate(format: predicateFormatCurentUser, (CredentialsManager.sharedInstance.getCurrentUser()?.userJabberId)!)
+     
+     */
+    return NO;
+}
+
 - (void)archiveMessage:(XMPPMessage *)message outgoing:(BOOL)isOutgoing xmppStream:(XMPPStream *)xmppStream
 {
 	// Message should either have a body, or be a composing notification
@@ -364,7 +441,11 @@ static XMPPMessageArchivingCoreDataStorage *sharedInstance;
 	}
 	
 	[self scheduleBlock:^{
-		
+        
+        if ([self isMessageExist:message] == YES) {
+            return ;
+        }
+                
 		NSManagedObjectContext *moc = [self managedObjectContext];
 		XMPPJID *myJid = [self myJIDForXMPPStream:xmppStream];
 		
